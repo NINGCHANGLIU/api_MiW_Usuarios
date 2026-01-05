@@ -1,33 +1,79 @@
-/.docker/data/db
+################################
+# OS / Editor
+################################
+.DS_Store
+Thumbs.db
 
-# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
-# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+################################
+# IDE
+################################
+.idea/
+.vscode/
 
-# User-specific stuff
-/.idea/
-/docs/
-
-###> symfony/framework-bundle ###
-/.env.local
-/.env.local.php
-/.env.*.local
-/config/secrets/prod/prod.decrypt.private.php
-/public/bundles/
-/var/
+################################
+# Composer
+################################
 /vendor/
-###< symfony/framework-bundle ###
+composer.phar
 
-###> lexik/jwt-authentication-bundle ###
+################################
+# Symfony runtime
+################################
+/var/
+/public/bundles/
+
+################################
+# Environment files
+################################
+.env.local
+.env.local.php
+.env.*.local
+
+################################
+# Symfony secrets
+################################
+/config/secrets/prod/prod.decrypt.private.php
+
+################################
+# JWT (lexik/jwt-authentication-bundle)
+################################
 /config/secrets/jwt/*.pem
-###< lexik/jwt-authentication-bundle ###
 
-/.php-cs-fixer.cache
-
-###> phpstan/phpstan ###
-phpstan.neon
-###< phpstan/phpstan ###
-
-###> phpunit/phpunit ###
+################################
+# PHPUnit
+################################
 /phpunit.xml
 /.phpunit.cache/
-###< phpunit/phpunit ###
+
+################################
+# PHPStan
+################################
+phpstan.neon
+
+################################
+# PHP-CS-Fixer
+################################
+.php-cs-fixer.cache
+
+################################
+# Docker
+################################
+/.docker/
+/.docker/data/
+/.docker/data/db/
+
+################################
+# Documentation / reports (generated)
+################################
+/docs/
+/docs/Infection_report/
+
+################################
+# GitHub / CI artifacts
+################################
+.github/
+
+################################
+# Binary / cache
+################################
+/bin/
