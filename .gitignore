@@ -20,6 +20,7 @@ composer.phar
 # Symfony runtime
 ################################
 /var/
+!/var/.gitkeep
 /public/bundles/
 
 ################################
@@ -59,14 +60,23 @@ phpstan.neon
 # Docker
 ################################
 /.docker/
-/.docker/data/
-/.docker/data/db/
+/.docker/**
+!.docker/.gitkeep
 
 ################################
-# Documentation / reports (generated)
+# Documentation / reports
 ################################
-/docs/
-/docs/Infection_report/
+# Ignore docs by default
+/docs/**
+
+# ✅ Allow domain model diagrams (assignment required)
+!/docs/
+!/docs/domain-model/
+!/docs/domain-model/**
+
+# Ignore generated reports (still ignored, even though docs is partially allowed)
+docs/Infection_report/
+docs/Infection_report/**
 
 ################################
 # GitHub / CI artifacts
