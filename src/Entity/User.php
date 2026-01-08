@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 // use Hateoas\Configuration\Annotation as Hateoas;
 use JetBrains\PhpStorm\ArrayShape;
@@ -70,6 +72,14 @@ class User implements UserInterface, JWTUserInterface, PasswordUpgraderInterface
     protected string $password;
 
     /**
+     * One User -> Many Results
+     * NOTE: This is persistence only (no controller/business yet)
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Result::class, orphanRemoval: true)]
+    #[Serializer\Exclude]
+    private Collection $results;
+
+    /**
      * User constructor.
      * @param string $email
      * @param string $password
@@ -80,6 +90,8 @@ class User implements UserInterface, JWTUserInterface, PasswordUpgraderInterface
         $this->email = $email;
         $this->roles = $roles;
         $this->setPassword($password);
+
+        $this->results = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -148,6 +160,33 @@ class User implements UserInterface, JWTUserInterface, PasswordUpgraderInterface
     {
         // If you store any temporary, sensitive data on the user, clear it here
         $this->password = '';
+    }
+
+    /**
+     * @return Collection<int, Result>
+     */
+    public function getResults(): Collection
+    {
+        return $this->results;
+    }
+
+    public function addResult(Result $result): self
+    {
+        if (!$this->results->contains($result)) {
+            $this->results->add($result);
+            $result->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeResult(Result $result): self
+    {
+        if ($this->results->removeElement($result)) {
+            if ($result->getUser() === $this) {
+                $result->setUser(null);
+            }
+        }
+        return $this;
     }
 
     /**
