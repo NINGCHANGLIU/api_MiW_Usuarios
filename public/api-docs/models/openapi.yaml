@@ -10,24 +10,27 @@ info:
     name: Máster Universitario en Ingeniería Web
     url: https://miw.etsisi.upm.es/
     email: miw.etsisi@upm.es
+
 servers:
   - url: '{schema}://{servername}:{port}/api/v1'
     description: 'MiW Production server (uses live data)'
     variables:
       schema:
-        enum:
-          - http
-          - https
+        enum: [ http, https ]
         default: https
       servername:
         default: 127.0.0.1
       port:
         default: '8000'
+
 tags:
   - name: '🔐 Login'
     description: 'User login'
   - name: '👥 Users'
     description: 'User management'
+  - name: '🧾 Results'
+    description: 'Results management'
+
 paths:
   /login_check:
     options:
@@ -42,8 +45,7 @@ paths:
             Allow:
               $ref: '#/components/headers/Allow'
     post:
-      tags:
-        - '🔐 Login'
+      tags: [ '🔐 Login' ]
       summary: Returns MiW api token
       description: 'Returns MiW api authorization token (JWT).'
       operationId: miw_post_login
@@ -96,7 +98,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  users: { description: 'Users array', type: array, items: { $ref: '#/components/schemas/User' } }
+                  users:
+                    description: 'Users array'
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
           headers:
             ETag:
               $ref: '#/components/headers/ETag'
@@ -105,22 +111,22 @@ paths:
         '404':
           $ref: '#/components/responses/404_Resource_Not_Found_Response'
     head:
-        tags: [ '👥 Users' ]
-        summary: Retrieves the collection of User resources.
-        description: 'Returns all users from the system that the user has access to.'
-        operationId: api_users_cget_head
-        security:
-            - MiWApiSecurity: []
-        responses:
-            '200':
-                description: '&lt;Response body is empty&gt;'
-                headers:
-                    ETag:
-                        $ref: '#/components/headers/ETag'
-            '401':
-                $ref: '#/components/responses/401_Unauthorized_Response'
-            '404':
-                $ref: '#/components/responses/404_Resource_Not_Found_Response'
+      tags: [ '👥 Users' ]
+      summary: Retrieves the collection of User resources.
+      description: 'Returns all users from the system that the user has access to.'
+      operationId: api_users_cget_head
+      security:
+        - MiWApiSecurity: []
+      responses:
+        '200':
+          description: '&lt;Response body is empty&gt;'
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+        '401':
+          $ref: '#/components/responses/401_Unauthorized_Response'
+        '404':
+          $ref: '#/components/responses/404_Resource_Not_Found_Response'
     post:
       tags: [ '👥 Users' ]
       summary: Creates a User resource.
@@ -159,6 +165,7 @@ paths:
           headers:
             Allow:
               $ref: '#/components/headers/Allow'
+
   '/users/{userId}':
     get:
       tags: [ '👥 Users' ]
@@ -168,7 +175,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/userId'
       security:
-        - MiWApiSecurity: [ ]
+        - MiWApiSecurity: []
       responses:
         '200':
           description: User
@@ -184,24 +191,24 @@ paths:
         '404':
           $ref: '#/components/responses/404_Resource_Not_Found_Response'
     head:
-        tags: [ '👥 Users' ]
-        summary: Retrieves a User resource based on a single ID.
-        description: 'Returns the user identified by `userId`.'
-        operationId: api_users_get_head
-        parameters:
-            - $ref: '#/components/parameters/userId'
-        security:
-            - MiWApiSecurity: [ ]
-        responses:
-            '200':
-                description: '&lt;Response body is empty&gt;'
-                headers:
-                    ETag:
-                        $ref: '#/components/headers/ETag'
-            '401':
-                $ref: '#/components/responses/401_Unauthorized_Response'
-            '404':
-                $ref: '#/components/responses/404_Resource_Not_Found_Response'
+      tags: [ '👥 Users' ]
+      summary: Retrieves a User resource based on a single ID.
+      description: 'Returns the user identified by `userId`.'
+      operationId: api_users_get_head
+      parameters:
+        - $ref: '#/components/parameters/userId'
+      security:
+        - MiWApiSecurity: []
+      responses:
+        '200':
+          description: '&lt;Response body is empty&gt;'
+          headers:
+            ETag:
+              $ref: '#/components/headers/ETag'
+        '401':
+          $ref: '#/components/responses/401_Unauthorized_Response'
+        '404':
+          $ref: '#/components/responses/404_Resource_Not_Found_Response'
     put:
       tags: [ '👥 Users' ]
       summary: Updates the User resource.
@@ -211,7 +218,7 @@ paths:
         - $ref: '#/components/parameters/userId'
         - $ref: '#/components/parameters/ifMatchParam'
       security:
-        - MiWApiSecurity: [ ]
+        - MiWApiSecurity: []
       requestBody:
         $ref: '#/components/requestBodies/UserRequestBody'
       responses:
@@ -239,7 +246,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/userId'
       security:
-        - MiWApiSecurity: [ ]
+        - MiWApiSecurity: []
       responses:
         '204':
           description: 'User deleted &lt;Response body is empty&gt;'
@@ -256,6 +263,165 @@ paths:
       operationId: api_users_options_id
       parameters:
         - $ref: '#/components/parameters/userId'
+      responses:
+        '204':
+          description: '`Allow` header _&lt;Response body is empty&gt;_'
+          headers:
+            Allow:
+              $ref: '#/components/headers/Allow'
+
+  /results:
+    get:
+      tags: [ '🧾 Results' ]
+      summary: Returns all results for current user
+      description: 'Returns all results for current authenticated user. ROLE_ADMIN may access all results.'
+      operationId: api_results_cget
+      security:
+        - MiWApiSecurity: []
+      responses:
+        '200':
+          description: Results collection
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Result'
+        '401':
+          $ref: '#/components/responses/401_Unauthorized_Response'
+        '403':
+          $ref: '#/components/responses/403_Forbidden_Response'
+    post:
+      tags: [ '🧾 Results' ]
+      summary: Creates a new result
+      description: 'Creates a new result for current user. ROLE_ADMIN may optionally set userId.'
+      operationId: api_results_post
+      security:
+        - MiWApiSecurity: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResultInput'
+      responses:
+        '201':
+          description: '`Created`: result created'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: '#/components/schemas/Result'
+          headers:
+            Location:
+              $ref: '#/components/headers/Location'
+        '400':
+          $ref: '#/components/responses/400_BadRequest_Response'
+        '401':
+          $ref: '#/components/responses/401_Unauthorized_Response'
+        '403':
+          $ref: '#/components/responses/403_Forbidden_Response'
+    options:
+      tags: [ '🧾 Results' ]
+      summary: Provides the list of HTTP supported methods.
+      description: 'Return a `Allow` header with a comma separated list of HTTP supported methods.'
+      operationId: api_results_options
+      responses:
+        '204':
+          description: '`Allow` header _&lt;Response body is empty&gt;_'
+          headers:
+            Allow:
+              $ref: '#/components/headers/Allow'
+
+  '/results/{resultId}':
+    get:
+      tags: [ '🧾 Results' ]
+      summary: Returns a result based on a single ID
+      description: 'Returns the result identified by `resultId`.'
+      operationId: api_results_get
+      parameters:
+        - $ref: '#/components/parameters/resultId'
+      security:
+        - MiWApiSecurity: []
+      responses:
+        '200':
+          description: Result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: '#/components/schemas/Result'
+        '401':
+          $ref: '#/components/responses/401_Unauthorized_Response'
+        '403':
+          $ref: '#/components/responses/403_Forbidden_Response'
+        '404':
+          $ref: '#/components/responses/404_Resource_Not_Found_Response'
+    put:
+      tags: [ '🧾 Results' ]
+      summary: Updates a result
+      description: 'Updates the result identified by `resultId`.'
+      operationId: api_results_put
+      parameters:
+        - $ref: '#/components/parameters/resultId'
+      security:
+        - MiWApiSecurity: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResultInput'
+      responses:
+        '200':
+          description: '`OK`: result updated'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: '#/components/schemas/Result'
+        '400':
+          $ref: '#/components/responses/400_BadRequest_Response'
+        '401':
+          $ref: '#/components/responses/401_Unauthorized_Response'
+        '403':
+          $ref: '#/components/responses/403_Forbidden_Response'
+        '404':
+          $ref: '#/components/responses/404_Resource_Not_Found_Response'
+    delete:
+      tags: [ '🧾 Results' ]
+      summary: Deletes a result
+      description: 'Deletes the result identified by `resultId`.'
+      operationId: api_results_delete
+      parameters:
+        - $ref: '#/components/parameters/resultId'
+      security:
+        - MiWApiSecurity: []
+      responses:
+        '204':
+          description: 'Result deleted &lt;Response body is empty&gt;'
+        '401':
+          $ref: '#/components/responses/401_Unauthorized_Response'
+        '403':
+          $ref: '#/components/responses/403_Forbidden_Response'
+        '404':
+          $ref: '#/components/responses/404_Resource_Not_Found_Response'
+    options:
+      tags: [ '🧾 Results' ]
+      summary: Provides the list of HTTP supported methods.
+      description: 'Return a `Allow` header with a comma separated list of HTTP supported methods.'
+      operationId: api_results_options_id
+      parameters:
+        - $ref: '#/components/parameters/resultId'
       responses:
         '204':
           description: '`Allow` header _&lt;Response body is empty&gt;_'
@@ -297,10 +463,10 @@ components:
           properties:
             parent:
               type: object
-              properties: {"href": { "type": "string", "format": "url" }}
+              properties: { "href": { "type": "string", "format": "url" } }
             self:
               type: object
-              properties: {"href": { "type": "string", "format": "url" }}
+              properties: { "href": { "type": "string", "format": "url" } }
       example:
         user:
           id: 1508
@@ -311,6 +477,82 @@ components:
               href: /api/v1/users
             self:
               href: /api/v1/users/1508
+
+    Result:
+      type: object
+      description: Result resource
+      properties:
+        id:
+          description: 'Result Id'
+          type: integer
+        scoreValue:
+          description: 'Score value'
+          type: number
+          format: float
+        passed:
+          description: 'Passed'
+          type: boolean
+        gradedAt:
+          description: 'Graded date-time'
+          type: string
+          format: date-time
+        attemptNumber:
+          description: 'Attempt number'
+          type: integer
+        remarks:
+          description: 'Remarks'
+          type: string
+        userId:
+          description: 'Owner user id'
+          type: integer
+        subjectId:
+          description: 'Subject id'
+          type: integer
+      required:
+        - id
+        - scoreValue
+        - passed
+        - gradedAt
+        - attemptNumber
+        - remarks
+        - userId
+        - subjectId
+
+    ResultInput:
+      type: object
+      description: Result input payload
+      properties:
+        scoreValue:
+          description: 'Score value'
+          type: number
+          format: float
+        passed:
+          description: 'Passed'
+          type: boolean
+        gradedAt:
+          description: 'Graded date-time'
+          type: string
+          format: date-time
+        attemptNumber:
+          description: 'Attempt number'
+          type: integer
+        remarks:
+          description: 'Remarks'
+          type: string
+        subjectId:
+          description: 'Subject id'
+          type: integer
+        userId:
+          description: 'Only ROLE_ADMIN may set this. ROLE_USER is ignored and uses authenticated user.'
+          type: integer
+      required:
+        - scoreValue
+        - passed
+        - gradedAt
+        - attemptNumber
+        - remarks
+        - subjectId
+
     Message:
       type: object
       description: HTTP response message
@@ -408,6 +650,7 @@ components:
                 email: User_email@example.com
                 password: User_password
                 roles: [ 'ROLE_USER', 'ROLE_ADMIN' ]
+
     LoginRequestBody:
       description: Registered user **e-mail** and **password**
       required: true
@@ -443,7 +686,15 @@ components:
       in: path
       description: 'ID of user'
       required: true
-      schema: { "type": "integer", pattern: '^\d+$' }
+      schema: { type: integer, pattern: '^\d+$' }
+
+    resultId:
+      name: resultId
+      in: path
+      description: 'ID of result'
+      required: true
+      schema: { type: integer, pattern: '^\d+$' }
+
     ifMatchParam:
       name: If-Match
       in: header
